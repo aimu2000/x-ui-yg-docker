@@ -47,28 +47,34 @@ echo "------------------------------------------------" >> "$LOG_FILE"
 log "Container entrypoint started."
 
 # ------------------------------------------------
-# 1. 同步二进制文件
+# 1. 运行环境准备
 # ------------------------------------------------
-log "Syncing binary files..."
+# 从镜像自带的 /usr/local/x-ui-dist 运行，不复制二进制文件到 /usr/local/x-ui
+# 这样保证 data 目录（挂载卷）只存放数据（DB/Logs），保持干净。
 
-if [ ! -f "${DIST_DIR}/x-ui" ]; then
-    warn "Binary source not found in ${DIST_DIR}, skipping sync."
-else
-    cp -f "${DIST_DIR}/x-ui" "${WORK_DIR}/"
-    
-    if [ ! -d "${WORK_DIR}/bin" ]; then
-        mkdir -p "${WORK_DIR}/bin"
-    fi
-    cp -rf "${DIST_DIR}/bin/"* "${WORK_DIR}/bin/"
-    
-    chmod +x "${WORK_DIR}/x-ui" "${WORK_DIR}/bin/"*
-    log "Binaries synced."
+log "Starting container..."
+
+# 确保工作目录存在 (存放 db, logs)
+if [ ! -d "${WORK_DIR}" ]; then
+    mkdir -p "${WORK_DIR}"
 fi
 
 # ------------------------------------------------
 # 2. 初始化配置
 # ------------------------------------------------
 DB_FILE="${WORK_DIR}/x-ui.db"
+# x-ui-yg 默认数据库路径为 /etc/x-ui-yg/x-ui-yg.db
+# 容器重启后 /etc 会重置，导致数据库丢失，从而触发重新初始化账号密码。
+# 此处建立软链接，将其指向持久化目录 /usr/local/x-ui/x-ui.db
+LINK_DB_DIR="/etc/x-ui-yg"
+LINK_DB_FILE="${LINK_DB_DIR}/x-ui-yg.db"
+
+if [ ! -d "${LINK_DB_DIR}" ]; then
+    mkdir -p "${LINK_DB_DIR}"
+fi
+
+# 强行建立软链接，确保应用读写的是持久化文件
+ln -sf "${DB_FILE}" "${LINK_DB_FILE}"
 
 if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
     log "Initializing configuration..."
@@ -138,12 +144,13 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
     echo "  WebPath : ${DISPLAY_PATH}" >> "$LOG_FILE"
     echo "---------------------------------------------" >> "$LOG_FILE"
 
-    ${WORK_DIR}/x-ui setting -username "${RUN_USER}" -password "${RUN_PASS}" >> "$LOG_FILE" 2>&1
-    ${WORK_DIR}/x-ui setting -port "${RUN_PORT}" >> "$LOG_FILE" 2>&1
+    # 使用 DIST_DIR 下的二进制文件进行初始化设置
+    ${DIST_DIR}/x-ui setting -username "${RUN_USER}" -password "${RUN_PASS}" >> "$LOG_FILE" 2>&1
+    ${DIST_DIR}/x-ui setting -port "${RUN_PORT}" >> "$LOG_FILE" 2>&1
     
     if [ "${RUN_PATH}" != "/" ]; then
         CLEAN_PATH="/$(echo "${RUN_PATH}" | sed 's|^/||')"
-        ${WORK_DIR}/x-ui setting -webBasePath "${CLEAN_PATH}" >> "$LOG_FILE" 2>&1
+        ${DIST_DIR}/x-ui setting -webBasePath "${CLEAN_PATH}" >> "$LOG_FILE" 2>&1
     fi
     
     log "Configuration initialized."
@@ -155,5 +162,6 @@ fi
 # 3. 启动应用
 # ------------------------------------------------
 log "Starting x-ui process..."
-cd "${WORK_DIR}"
+# 切换到 DIST_DIR 运行，确保能找到 ./bin/xray-linux-amd64 等资源
+cd "${DIST_DIR}"
 exec ./x-ui
