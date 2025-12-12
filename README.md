@@ -9,7 +9,7 @@
 *   **极度轻量**: 基于 Alpine 基础镜像构建，只包含必要依赖。
 *   **多架构支持**: 同时支持 `linux/amd64` 和 `linux/arm64`。
 *   **数据持久化**: 关键数据和配置可挂载到宿主机。
-*   **自动更新**: 通过 GitHub Actions 进行每日构建，跟进上游更新。
+*   **自动更新**: 通过 [VerWatch](https://github.com/ShaoG-R/verwatch)按小时监测版本更新，GitHub Actions 进行构建，跟进上游更新。
 
 ## 使用方法
 
