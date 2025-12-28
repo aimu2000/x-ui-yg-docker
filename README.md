@@ -8,15 +8,18 @@
 
 *   **极度轻量**: 基于 Alpine 基础镜像构建，只包含必要依赖。
 *   **多架构支持**: 同时支持 `linux/amd64` 和 `linux/arm64`。
-*   **数据持久化**: 关键数据和配置可挂载到宿主机。
+*   **数据持久化**: 关键数据和配置挂载到宿主机。
 *   **自动更新**: 通过 [VerWatch](https://github.com/ShaoG-R/verwatch)按小时监测版本更新，GitHub Actions 进行构建，跟进上游更新。
 
 ## 使用方法
 
 ### 方式一：使用已发布的镜像 (推荐)
 
-我们通过 GitHub Container Registry 发布构建好的镜像。
-镜像地址: `shaogme/x-ui-yg:alpine` (或者 `latest`)
+我们通过 GitHub Container Registry 和 DockerHub 发布构建好的镜像。
+
+GitHub Container Registry 镜像地址: `ghcr.io/shaog-r/x-ui-yg-docker:alpine` (或者 `latest`)
+
+DockerHub 镜像地址: `shaogme/x-ui-yg:alpine` (或者 `latest`)
 
 #### 1. 简单运行 (Docker CLI)
 
@@ -94,7 +97,7 @@ docker-compose up -d
 
 ### 获取初始账号密码
 
-若你在启动时未设置 `XUI_USER` 和 `XUI_PASS` 环境变量，容器会自动生成随机的账号和密码。可以通过查看挂载目录下的 `init.log` 文件获取：
+若你在启动时未设置 `XUI_USER` 、 `XUI_PASS` 、 `XUI_PORT` 和 `XUI_PATH`，容器会自动随机生成。可以通过查看挂载目录下的 `init.log` 文件获取：
 
 ```bash
 cat data/init.log
