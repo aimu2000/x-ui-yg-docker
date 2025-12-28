@@ -80,7 +80,9 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
     log "Initializing configuration..."
 
     gen_random() {
-        tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 8 | head -n 1
+        local length="$1"
+        [ -z "$length" ] && length=8
+        tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w "$length" | head -n 1
     }
 
     # Username
@@ -92,7 +94,7 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
             DISPLAY_USER="[Set in env]"
         fi
     else
-        RUN_USER=$(gen_random)
+        RUN_USER=$(gen_random 6)
         DISPLAY_USER="$RUN_USER"
     fi
 
@@ -105,7 +107,7 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
             DISPLAY_PASS="[Set in env]"
         fi
     else
-        RUN_PASS=$(gen_random)
+        RUN_PASS=$(gen_random 6)
         DISPLAY_PASS="$RUN_PASS"
     fi
 
@@ -118,7 +120,14 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
             DISPLAY_PORT="[Set in env]"
         fi
     else
-        RUN_PORT=54321
+        # Random port 10000-65535
+        # Use shuf if available, else bash RANDOM
+        if command -v shuf >/dev/null 2>&1; then
+            RUN_PORT=$(shuf -i 10000-65535 -n 1)
+        else
+            # 10000 + (0..55535)
+            RUN_PORT=$(( 10000 + RANDOM % 55536 ))
+        fi
         DISPLAY_PORT="$RUN_PORT"
     fi
 
@@ -131,7 +140,10 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
             DISPLAY_PATH="[Set in env]"
         fi
     else
-        RUN_PATH="/"
+        # Random path: length 4-8
+        # Calculate random length between 4 and 8
+        R_LEN=$(( 4 + RANDOM % 5 ))
+        RUN_PATH="/$(gen_random $R_LEN)"
         DISPLAY_PATH="$RUN_PATH"
     fi
 

@@ -16,6 +16,7 @@ services:
       - XUI_USER=
       - XUI_PASS=
       - XUI_PORT=54321
+      - XUI_PATH= # 留空则随机生成4-8位字符路径
       - VERBOSE=false # 设置为 true 以在日志显示设置的环境变量值
       # - RESET_CONFIG=true # 取消注释以强制重置账号密码
     volumes:

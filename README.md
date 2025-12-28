@@ -27,6 +27,7 @@ docker run -d \
     -v $(pwd)/data:/usr/local/x-ui \
     -e XUI_USER=myuser \
     -e XUI_PASS=mypassword \
+    -e XUI_PORT=54321 \
     ghcr.io/shaog-r/x-ui-yg-docker:alpine
 ```
 
@@ -52,6 +53,7 @@ services:
     environment:
       - XUI_USER=myuser
       - XUI_PASS=mypassword
+      - XUI_PORT=54321
 ```
 
 然后运行：
@@ -78,6 +80,7 @@ docker run -d \
     -v $(pwd)/data:/usr/local/x-ui \
     -e XUI_USER=myuser \
     -e XUI_PASS=mypassword \
+    -e XUI_PORT=54321 \
     x-ui-yg:alpine
 ```
 
@@ -108,17 +111,18 @@ cat data/init.log
 x-ui Initial Login Info:
   Username: jkeiw3AV
   Password: WvOuqfWB
-  Port    : 54321
-  WebPath : /
+  Port    : 16543
+  WebPath : /a8Z3s
 ---------------------------------------------
 set username and password success
-set port 54321 success
+set port 16543 success
+set webBasePath /a8Z3s success
 2025-12-08 13:56:05 [Info] Configuration initialized.
 2025-12-08 13:56:05 [Info] Starting x-ui process...
 ```
 
 **关于 `init.log` 的说明：**
-1. 该日志仅用于记录容器启动时的初始化过程，包括随机生成的账号密码（若未在环境变量设置，也可能显示为 `[Set in env]`，需设置 `VERBOSE=true` 开启显示真实值）。
+1. 该日志仅用于记录容器启动时的初始化过程。若未在环境变量设置 `XUI_USER`, `XUI_PASS`, `XUI_PORT`, `XUI_PATH`，容器会自动生成随机值（端口范围 10000-65535，Path 为 4-8 位随机字符）。
 2. **日志滚动机制**：为防止日志无限膨胀，当日志文件超过 50KB 时，旧的 `init.log` 会被重命名为 `init.log.old`，并创建新的日志文件。
 3. **安全建议**：获取到初始账号密码并登录修改后，为了安全起见，建议手动删除挂载目录下的 `init.log` 文件。
 
