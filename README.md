@@ -1,6 +1,6 @@
 # x-ui-yg Docker
 
-这是一个基于 Alpine Linux 的轻量级 [x-ui-yg](https://github.com/yonggekkk/x-ui-yg) Docker 镜像。支持多架构 (amd64, arm64)，并提供每日自动构建。
+这是一个基于 Alpine Linux 的轻量级 [x-ui-yg](https://github.com/yonggekkk/x-ui-yg) Docker 镜像。支持多架构 (amd64, arm64)，并使用我自设计的[版本监测服务](https://github.com/ShaoG-R/verwatch)自动构建(按小时检测新版本)。
 
 本项目遵循 MIT License。
 
@@ -9,7 +9,7 @@
 *   **极度轻量**: 基于 Alpine 基础镜像构建，只包含必要依赖。
 *   **多架构支持**: 同时支持 `linux/amd64` 和 `linux/arm64`。
 *   **数据持久化**: 关键数据和配置可挂载到宿主机。
-*   **自动更新**: 通过 GitHub Actions 进行每日构建，跟进上游更新。
+*   **自动更新**: 通过 [VerWatch](https://github.com/ShaoG-R/verwatch)按小时监测版本更新，GitHub Actions 进行构建，跟进上游更新。
 
 ## 使用方法
 
